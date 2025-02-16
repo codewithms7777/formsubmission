@@ -2,7 +2,8 @@
 FROM php:8.1-apache
 
 # Install necessary PHP extensions for MySQL
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN apt-get update && apt-get install -y libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql
 
 # Copy project files to the container
 COPY . /var/www/html/
