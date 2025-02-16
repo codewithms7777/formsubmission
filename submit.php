@@ -1,44 +1,30 @@
 <?php
-// Database credentials
-$servername = "your-remote-mysql-host"; // Example: "mysql.render.com"
-$username = "xbygrwxg_mscorp7"; // Your database username
-$password = "ms7777ms"; // Your database password
-$dbname = "xbygrwxg_mscorp7"; // Your database name
+// Database credentials from Render
+$dsn = "pgsql:host=dpg-cup0buhu0jms73bipm6g-a;port=5432;dbname=mscorp;user=mahavir;password=VJ9K5LWQYimkHxbBgrW94VFz2943kJ3V";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+try {
+    $conn = new PDO($dsn);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+    // Insert Data
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $name = trim($_POST['name']);
+        $email = trim($_POST['email']);
+        $comments = trim($_POST['comments']);
 
-// Insert data into database
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $comments = trim($_POST['comments']);
+        if (!empty($name) && !empty($email) && !empty($comments)) {
+            $stmt = $conn->prepare("INSERT INTO msform1 (name, email, comments) VALUES (:name, :email, :comments)");
+            $stmt->bindParam(":name", $name);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":comments", $comments);
+            $stmt->execute();
 
-    // Prevent empty inputs
-    if (!empty($name) && !empty($email) && !empty($comments)) {
-        $stmt = $conn->prepare("INSERT INTO msform1 (name, email, comments) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $email, $comments);
-
-        if ($stmt->execute()) {
             echo "Submitted successfully";
         } else {
-            echo "Error: " . $stmt->error;
+            echo "All fields are required!";
         }
-
-        $stmt->close();
-    } else {
-        echo "All fields are required!";
     }
+} catch (PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
 }
-
-// Retrieve data from database
-$sql = "SELECT * FROM msform1";
-$result = $conn->query($sql);
-
-$conn->close();
 ?>
