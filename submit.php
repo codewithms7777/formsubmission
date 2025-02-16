@@ -1,30 +1,37 @@
-<?php
-// Database credentials from Render
-$dsn = "pgsql:host=dpg-cup0buhu0jms73bipm6g-a;port=5432;dbname=mscorp;user=mahavir;password=VJ9K5LWQYimkHxbBgrW94VFz2943kJ3V";
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
-try {
-    $conn = new PDO($dsn);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-    // Insert Data
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $name = trim($_POST['name']);
-        $email = trim($_POST['email']);
-        $comments = trim($_POST['comments']);
+// MongoDB Connection (Direct URI)
+mongoose.connect(
+  "mongodb+srv://mscorp7:mscorp7777@mscorp1.d5y2q.mongodb.net/mscorp",
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
 
-        if (!empty($name) && !empty($email) && !empty($comments)) {
-            $stmt = $conn->prepare("INSERT INTO msform1 (name, email, comments) VALUES (:name, :email, :comments)");
-            $stmt->bindParam(":name", $name);
-            $stmt->bindParam(":email", $email);
-            $stmt->bindParam(":comments", $comments);
-            $stmt->execute();
+// Define Schema & Model
+const formSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  comments: String,
+});
+const Form = mongoose.model("Form", formSchema);
 
-            echo "Submitted successfully";
-        } else {
-            echo "All fields are required!";
-        }
-    }
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-}
-?>
+// Handle Form Submission
+app.post("/submit", async (req, res) => {
+  try {
+    const { name, email, comments } = req.body;
+    const newEntry = new Form({ name, email, comments });
+    await newEntry.save();
+    res.status(201).json({ message: "Submitted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Submission failed" });
+  }
+});
+
+// Start Server
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
