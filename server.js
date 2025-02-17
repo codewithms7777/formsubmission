@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB Connection (Direct URI)
+
 mongoose.connect(
   "mongodb+srv://mscorp7:mscorp7777@mscorp1.d5y2q.mongodb.net/mscorp",
   { useNewUrlParser: true, useUnifiedTopology: true }
